@@ -1,0 +1,38 @@
+﻿{
+  "name": "hk-ui",
+  "version": "1.0.0",
+  "description": "Componentes React reutilizáveis da HK Sistemas",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "powershell -Command \"if (Test-Path dist) { Remove-Item dist -Recurse -Force }\"",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "react",
+    "components",
+    "hk-sistemas",
+    "hk-ui"
+  ],
+  "author": "HK Sistemas",
+  "license": "MIT",
+  "type": "commonjs",
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "dependencies": {
+    "lucide-react": "^1.33.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "typescript": "^7.0.2"
+  }
+}
