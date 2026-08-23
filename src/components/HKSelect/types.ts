@@ -17,6 +17,7 @@ export interface HKSelectProps {
     disabled?: boolean
     className?: string
     theme?: HKSelectTheme
+    minHeight?: number
 
     // creatable
     creatable?: boolean

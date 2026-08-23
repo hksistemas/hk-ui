@@ -43,7 +43,8 @@ const THEME_CLASSES: Record<HKSelectTheme, {
 }
 
 const SEARCH_BAR_HEIGHT = 57
-const RADIUS = '0.375rem' // rounded-md, usado só nos casos "raros" (estado aberto), via style
+const RADIUS = '0.375rem'
+const DEFAULT_MIN_HEIGHT = 40 // equivalente ao min-h-10 (2.5rem)
 
 interface DropdownPos {
     top?: number
@@ -72,6 +73,7 @@ export function HKSelect({
     multi = false,
     loadOptions,
     maxListHeight = 224,
+    minHeight = DEFAULT_MIN_HEIGHT,
 }: HKSelectProps) {
     const [open, setOpen] = useState(false)
     const [query, setQuery] = useState('')
@@ -87,6 +89,8 @@ export function HKSelect({
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     const t = THEME_CLASSES[theme]
+
+    const resolvedMinHeight = typeof minHeight === 'number' ? `${minHeight}px` : minHeight
 
     const options = loadOptions ? asyncOptions : (staticOptions ?? [])
 
@@ -218,16 +222,14 @@ export function HKSelect({
 
     const hasValue = multi ? selectedValues.length > 0 : !!value
 
-    // Radius do trigger: no estado FECHADO usa a classe Tailwind normal
-    // (rounded-sm), que é segura e nunca é purgada. Só o estado ABERTO
-    // (corner-radius assimétrico, dependente de openUpward) vai via style,
-    // porque essa combinação é rara e pode não existir em nenhum outro
-    // lugar do app consumidor.
-    const triggerStyle: React.CSSProperties = open
-        ? (pos?.openUpward
-            ? { borderBottomLeftRadius: RADIUS, borderBottomRightRadius: RADIUS, borderTopLeftRadius: 0, borderTopRightRadius: 0 }
-            : { borderTopLeftRadius: RADIUS, borderTopRightRadius: RADIUS, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 })
-        : {}
+    const triggerStyle: React.CSSProperties = {
+        minHeight: resolvedMinHeight,
+        ...(open
+            ? (pos?.openUpward
+                ? { borderBottomLeftRadius: RADIUS, borderBottomRightRadius: RADIUS, borderTopLeftRadius: 0, borderTopRightRadius: 0 }
+                : { borderTopLeftRadius: RADIUS, borderTopRightRadius: RADIUS, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 })
+            : {}),
+    }
 
     const chevronStyle: React.CSSProperties = {
         transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -313,7 +315,7 @@ export function HKSelect({
                 onClick={toggle}
                 disabled={disabled}
                 className={`
-                    w-full flex items-center gap-2 px-3 min-h-10 text-sm text-left
+                    w-full flex items-center gap-2 px-3 text-sm text-left
                     border transition-colors
                     ${open ? 'border-gray-400' : `rounded-sm ${t.trigger}`}
                     ${disabled ? `opacity-50 cursor-not-allowed ${t.triggerDisabled}` : `cursor-pointer ${t.trigger}`}
