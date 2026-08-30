@@ -1,175 +1,389 @@
-# HKSelect
+# @hksistemas/hk-ui
 
-Select customizável com busca, criação de opções, seleção múltipla e carregamento assíncrono, feito para o pacote `hk-ui`. Renderiza o dropdown em um portal (`document.body`), então funciona corretamente dentro de modais, tabelas com scroll, ou qualquer container com `overflow` ou `transform` — sem cortar, sem desalinhar.
+Componentes React reutilizáveis desenvolvidos pela **HK Sistemas**.
+
+O objetivo do `@hksistemas/hk-ui` é centralizar componentes visuais e comportamentais reutilizáveis para aplicações React/Next.js, evitando a duplicação de componentes entre projetos.
 
 ## Instalação
 
 ```bash
-npm install hk-ui
+npm install @hksistemas/hk-ui
 ```
 
-`react` e `react-dom` são `peerDependencies` — o projeto que consome o pacote precisa já ter essas duas instaladas (versões `>=18.2.0 <20`).
+## Requisitos
 
-## Uso básico
+* React 18 ou 19
+* React DOM 18 ou 19
+* Tailwind CSS
+* Next.js, quando utilizado em aplicações Next.js
+
+O pacote utiliza `lucide-react` para os ícones de alguns componentes.
+
+---
+
+# Componentes
+
+## HKSelect
+
+Select customizado com suporte a:
+
+* pesquisa;
+* seleção simples;
+* seleção múltipla;
+* carregamento assíncrono;
+* criação de novas opções;
+* limpeza do valor;
+* tema claro e escuro;
+* posicionamento automático do dropdown;
+* controle de altura;
+* opções estáticas ou carregadas dinamicamente.
+
+### Importação
 
 ```tsx
-import { HKSelect } from 'hk-ui'
-
-const options = [
-    { value: '1', label: 'Agente de Controle Interno' },
-    { value: '2', label: 'Coordenadora' },
-]
-
-function Exemplo() {
-    const [valor, setValor] = useState('')
-
-    return (
-        <HKSelect
-            name="cargo"
-            value={valor}
-            onChange={(v) => setValor(v as string)}
-            options={options}
-            placeholder="Selecione..."
-        />
-    )
-}
+import { HKSelect } from '@hksistemas/hk-ui'
 ```
 
-`onChange` recebe `string` no modo simples e `string[]` no modo `multi`. Faça o type narrowing conforme o caso, como no exemplo acima.
-
-## Propriedades
-
-### Básicas
-
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `options` | `HKSelectOption[]` | `[]` | Lista de opções `{ value, label }`. Ignorado se `loadOptions` for passado. |
-| `name` | `string` | — | Nome do campo, usado no(s) `<input type="hidden">` interno(s) — útil pra formulários nativos (`<form>` + `FormData`). |
-| `value` | `string \| string[]` | — | Valor(es) selecionado(s). `string` no modo simples, `string[]` no modo `multi`. |
-| `onChange` | `(value: string \| string[]) => void` | — | Disparado a cada seleção/remoção. |
-| `placeholder` | `string` | `'Selecione...'` | Texto exibido quando não há valor selecionado. |
-| `searchPlaceholder` | `string` | `'Buscar...'` | Placeholder do campo de busca dentro do dropdown. |
-| `required` | `boolean` | — | Aplica `required` no `<input type="hidden">` (modo simples apenas — não tem efeito em `multi`). |
-| `disabled` | `boolean` | — | Desabilita o campo (visual + interação). |
-| `className` | `string` | `''` | Classes adicionais aplicadas no wrapper externo (`div`). |
-| `theme` | `'light' \| 'dark'` | `'light'` | Paleta de cores do componente. |
-
-### Altura
-
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `minHeight` | `number \| string` | `40` (equivale a `2.5rem`) | Altura mínima do campo (trigger). Aceita número em `px` (`48`) ou string com unidade (`'3rem'`). Use pra igualar a altura de outros inputs do mesmo formulário. |
-
-### Criação de opções (`creatable`)
-
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `creatable` | `boolean` | `false` | Se `true`, exibe a opção "Criar ..." quando o texto buscado não corresponde a nenhuma opção existente. |
-| `onCreateOption` | `(inputValue: string) => void` | — | Chamado ao clicar em "Criar ...". Normalmente aqui você salva a nova opção no backend e atualiza a lista de `options` manualmente. |
-| `formatCreateLabel` | `(inputValue: string) => string` | `` `Criar "${valor}"` `` | Customiza o texto da opção de criação. |
+### Uso básico
 
 ```tsx
 <HKSelect
-    name="cargo"
-    value={cargo?.value ?? ''}
-    options={options}
-    onChange={(v) => setCargo(options.find(o => o.value === v) ?? null)}
-    creatable
-    onCreateOption={async (texto) => {
-        const novo = await criarCargo(texto)
-        setOptions(prev => [...prev, novo])
-        setCargo(novo)
-    }}
-    formatCreateLabel={(v) => `Clique para criar "${v}"`}
+    name="processo_status"
+    value={formData.processo_status}
+    onChange={(value) =>
+        handleChange('processo_status', value)
+    }
+    placeholder="Selecione..."
+    required
+    options={[
+        {
+            value: '1',
+            label: 'Em andamento',
+        },
+        {
+            value: '2',
+            label: 'Homologado',
+        },
+        {
+            value: '3',
+            label: 'Fracassado/Deserto',
+        },
+        {
+            value: '4',
+            label: 'Anulado/Cancelado/Revogado',
+        },
+        {
+            value: '5',
+            label: 'Suspenso',
+        },
+    ]}
 />
 ```
 
-### Campo limpável (`clearable`)
+### Props
 
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `clearable` | `boolean` | `false` | Exibe um "x" pra limpar o valor selecionado, sem precisar abrir o dropdown. |
-| `onClear` | `() => void` | — | Chamado (além do `onChange`) quando o campo é limpo pelo "x". |
+| Prop                | Tipo                                   | Padrão           | Descrição                                 |
+| ------------------- | -------------------------------------- | ---------------- | ----------------------------------------- |
+| `name`              | `string`                               | —                | Nome do campo                             |
+| `value`             | `string \| string[]`                   | —                | Valor selecionado                         |
+| `onChange`          | `(value) => void`                      | —                | Executado quando o valor muda             |
+| `options`           | `HKSelectOption[]`                     | `[]`             | Lista de opções                           |
+| `placeholder`       | `string`                               | `"Selecione..."` | Texto quando nenhum valor foi selecionado |
+| `searchPlaceholder` | `string`                               | `"Buscar..."`    | Placeholder da pesquisa                   |
+| `required`          | `boolean`                              | —                | Define o campo como obrigatório           |
+| `disabled`          | `boolean`                              | —                | Desabilita o componente                   |
+| `className`         | `string`                               | `""`             | Classes CSS adicionais                    |
+| `theme`             | `"light" \| "dark"`                    | `"light"`        | Tema do componente                        |
+| `minHeight`         | `number`                               | `40`             | Altura mínima do campo                    |
+| `creatable`         | `boolean`                              | `false`          | Permite criar uma nova opção              |
+| `onCreateOption`    | `(inputValue) => void`                 | —                | Executado ao criar uma opção              |
+| `formatCreateLabel` | `(inputValue) => string`               | —                | Personaliza o texto da opção de criação   |
+| `clearable`         | `boolean`                              | `false`          | Permite limpar o valor                    |
+| `onClear`           | `() => void`                           | —                | Executado ao limpar                       |
+| `multi`             | `boolean`                              | `false`          | Permite seleção múltipla                  |
+| `loadOptions`       | `(query) => Promise<HKSelectOption[]>` | —                | Carregamento assíncrono                   |
+| `maxListHeight`     | `number`                               | `224`            | Altura máxima da lista                    |
 
-### Seleção múltipla (`multi`)
-
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `multi` | `boolean` | `false` | Ativa seleção múltipla. `value` e `onChange` passam a trabalhar com `string[]`. As opções selecionadas aparecem como chips dentro do campo, cada um removível individualmente. |
+### Seleção múltipla
 
 ```tsx
 <HKSelect
-    name="unidades"
+    name="categorias"
+    value={categorias}
+    onChange={setCategorias}
     multi
-    value={unidadesSelecionadas}
-    onChange={(v) => setUnidadesSelecionadas(v as string[])}
-    options={unidades}
+    options={[
+        {
+            value: '1',
+            label: 'Categoria 1',
+        },
+        {
+            value: '2',
+            label: 'Categoria 2',
+        },
+        {
+            value: '3',
+            label: 'Categoria 3',
+        },
+    ]}
 />
 ```
 
-### Carregamento assíncrono (`loadOptions`)
-
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `loadOptions` | `(query: string) => Promise<HKSelectOption[]>` | — | Se passado, `options` é ignorado. É chamado automaticamente ao abrir o dropdown (com `query` vazia) e a cada digitação na busca, com debounce de 300ms. |
-| `maxListHeight` | `number` | `224` | Altura máxima (em px) da lista de opções antes de rolar. Também usado no cálculo de abrir o dropdown pra cima ou para baixo. |
+### Tema escuro
 
 ```tsx
 <HKSelect
-    name="municipio"
-    value={municipioId}
-    onChange={(v) => setMunicipioId(v as string)}
-    loadOptions={async (query) => {
-        const res = await fetch(`/api/municipios?q=${query}`)
-        return res.json()
-    }}
+    name="status"
+    value={status}
+    onChange={setStatus}
+    theme="dark"
+    options={options}
 />
 ```
 
-## Comportamentos importantes
+---
 
-- **Posicionamento via portal:** o dropdown é renderizado com `createPortal` direto no `document.body`, com posição calculada via `getBoundingClientRect()` e `position: fixed`. Isso evita os problemas clássicos de `overflow: hidden` cortando o dropdown ou `transform` (comum em modais/diálogos) descolando a posição.
-- **Abre pra cima automaticamente:** se não houver espaço suficiente abaixo do campo (considerando `maxListHeight`) mas houver espaço acima, o dropdown se posiciona acima do campo automaticamente.
-- **Recalcula em scroll e resize:** enquanto aberto, a posição é recalculada continuamente (inclusive scroll dentro de containers internos, como o corpo de um modal).
-- **Fecha ao clicar fora:** considera tanto o campo quanto o dropdown portalado como "dentro".
-- **Foco automático na busca:** ao abrir, o campo de busca recebe foco automaticamente.
-- **Scroll até o item selecionado:** ao abrir, a lista rola automaticamente até a opção já selecionada (modo simples) ou a primeira selecionada (modo `multi`).
+# HKClickableRow
 
-## Tipos
+Linha de tabela (`tr`) clicável, desenvolvida para cenários em que uma linha representa um registro e pode executar uma ação ao ser selecionada.
 
-```ts
-export interface HKSelectOption {
-    value: string
-    label: string
-}
+O componente possui suporte nativo a:
 
-export type HKSelectTheme = 'light' | 'dark'
+* clique na linha;
+* identificação do registro através de `id`;
+* estado de carregamento individual;
+* spinner na primeira célula;
+* bloqueio de novos cliques durante o carregamento;
+* cursor de espera;
+* temas claro e escuro;
+* classes CSS personalizadas;
+* uso direto dentro de `<table>`.
 
-export interface HKSelectProps {
-    options?: HKSelectOption[]
-    name: string
-    value: string | string[]
-    onChange: (value: string | string[]) => void
-    placeholder?: string
-    searchPlaceholder?: string
-    required?: boolean
-    disabled?: boolean
-    className?: string
-    theme?: HKSelectTheme
-    creatable?: boolean
-    onCreateOption?: (inputValue: string) => void
-    formatCreateLabel?: (inputValue: string) => string
-    clearable?: boolean
-    onClear?: () => void
-    multi?: boolean
-    loadOptions?: (query: string) => Promise<HKSelectOption[]>
-    maxListHeight?: number
-    minHeight?: number | string
+### Importação
+
+```tsx
+import { HKClickableRow } from '@hksistemas/hk-ui'
+```
+
+### Uso básico
+
+O `HKClickableRow` substitui diretamente o `<tr>`:
+
+```tsx
+<table>
+    <tbody>
+        <HKClickableRow
+            id={processo.id}
+            onClick={handleRowClick}
+        >
+            <td>{processo.numero}</td>
+            <td>{processo.modalidade}</td>
+            <td>{processo.status}</td>
+        </HKClickableRow>
+    </tbody>
+</table>
+```
+
+### Navegação com estado de carregamento
+
+Um dos principais objetivos do componente é permitir que a linha apresente um indicador visual enquanto a ação associada a ela está sendo executada.
+
+Exemplo:
+
+```tsx
+const [loadingId, setLoadingId] = useState<
+    string | number | null
+>(null)
+
+const handleRowClick = async (
+    id: string | number
+) => {
+    setLoadingId(id)
+
+    try {
+        await router.push(
+            `/contratos/${id}/details`
+        )
+    } catch (error) {
+        setLoadingId(null)
+    }
 }
 ```
 
-## Limitações conhecidas
+A linha pode então ser utilizada:
 
-- `required` só tem efeito no modo simples (o `<input type="hidden">` de cada valor selecionado, no modo `multi`, não recebe `required`).
-- Não há suporte a navegação por teclado (setas/Enter) na lista de opções — apenas clique e digitação na busca.
-- O componente depende de `document` (via portal), então só funciona em componentes client (`'use client'`); não é compatível com renderização puramente server-side sem hidratação.
+```tsx
+<HKClickableRow
+    key={c.id}
+    id={c.id}
+    loadingId={loadingId}
+    onClick={handleRowClick}
+    className={rowStyle}
+>
+    <td>{c.numero}</td>
+    <td>{c.objeto}</td>
+    <td>{c.valor}</td>
+</HKClickableRow>
+```
+
+Quando o `id` da linha for igual ao `loadingId`, o componente:
+
+1. exibe um spinner na primeira célula;
+2. aplica o estado visual de carregamento;
+3. bloqueia novos cliques;
+4. altera o cursor para `wait`.
+
+Isso permite que somente a linha selecionada fique em estado de carregamento.
+
+### `canClick`
+
+Para tornar uma linha não clicável:
+
+```tsx
+<HKClickableRow
+    id={processo.id}
+    canClick={false}
+>
+    <td>{processo.numero}</td>
+    <td>{processo.status}</td>
+</HKClickableRow>
+```
+
+Quando `canClick` é `false`, o componente não executa `onClick` e não aplica o comportamento visual de hover/cursor de linha clicável.
+
+### Tema
+
+Tema claro:
+
+```tsx
+<HKClickableRow
+    id={processo.id}
+    theme="light"
+>
+    <td>{processo.numero}</td>
+    <td>{processo.status}</td>
+</HKClickableRow>
+```
+
+Tema escuro:
+
+```tsx
+<HKClickableRow
+    id={processo.id}
+    theme="dark"
+>
+    <td>{processo.numero}</td>
+    <td>{processo.status}</td>
+</HKClickableRow>
+```
+
+O componente **não depende de nenhum contexto de tema externo**. O projeto consumidor pode decidir qual tema utilizar.
+
+### Classes personalizadas
+
+A aparência também pode ser complementada através de `className`:
+
+```tsx
+<HKClickableRow
+    id={processo.id}
+    className="hover:bg-blue-50"
+>
+    <td>{processo.numero}</td>
+    <td>{processo.status}</td>
+</HKClickableRow>
+```
+
+### Props
+
+| Prop        | Tipo                       | Padrão    | Descrição                              |
+| ----------- | -------------------------- | --------- | -------------------------------------- |
+| `id`        | `string \| number`         | —         | Identificador da linha                 |
+| `loadingId` | `string \| number \| null` | —         | ID da linha atualmente em carregamento |
+| `onClick`   | `(id) => void`             | —         | Executado ao clicar na linha           |
+| `canClick`  | `boolean`                  | `true`    | Define se a linha pode ser clicada     |
+| `className` | `string`                   | `""`      | Classes CSS adicionais                 |
+| `theme`     | `"light" \| "dark"`        | `"light"` | Tema visual                            |
+| `children`  | `React.ReactNode`          | —         | Células `<td>` da linha                |
+
+---
+
+# Tipos
+
+Os tipos dos componentes também são exportados pelo pacote.
+
+```tsx
+import type {
+    HKSelectOption,
+    HKSelectProps,
+    HKSelectTheme,
+    HKClickableRowProps,
+    HKClickableRowTheme,
+} from '@hksistemas/hk-ui'
+```
+
+---
+
+# Desenvolvimento
+
+Clone o repositório privado da biblioteca:
+
+```bash
+git clone https://github.com/hksistemas/hk-ui.git
+```
+
+Instale as dependências:
+
+```bash
+npm install
+```
+
+Execute o build:
+
+```bash
+npm run build
+```
+
+Limpe o diretório `dist`:
+
+```bash
+npm run clean
+```
+
+Antes da publicação, o pacote executa automaticamente o build através dos scripts configurados no `package.json`.
+
+---
+
+# Publicação
+
+O código-fonte do projeto é mantido no GitHub privado da HK Sistemas.
+
+O pacote compilado é publicado publicamente no npm:
+
+```bash
+npm publish --access public
+```
+
+Para uma correção de versão:
+
+```bash
+npm version patch
+npm publish --access public
+```
+
+Para uma nova funcionalidade compatível:
+
+```bash
+npm version minor
+npm publish --access public
+```
+
+---
+
+# Licença
+
+MIT
+
+Copyright © HK Sistemas
+
+```
+```
